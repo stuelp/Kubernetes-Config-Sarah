@@ -1,0 +1,96 @@
+FROM archlinux:latest
+
+# Update system and install base dependencies
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm \
+    base-devel \
+    git \
+    nodejs \
+    npm \
+    neovim \
+    ripgrep \
+    fd \
+    wget \
+    curl \
+    unzip \
+    python \
+    python-pip \
+    go \
+    jq \
+    fluxcd \
+    sops
+
+
+
+
+
+
+# Install lazyvim dependencies
+RUN pacman -S --noconfirm \
+    gcc \
+    make \
+    cmake \
+    k9s \
+    azure-cli \
+    helm \
+    kubectl
+
+    
+
+
+
+
+# Install and configure asdf
+RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.1 && \
+    echo '. "$HOME/.asdf/asdf.sh"' >> ~/.bashrc && \
+    echo '. "$HOME/.asdf/completions/asdf.bash"' >> ~/.bashrc && \
+    . "$HOME/.asdf/asdf.sh" && \
+    asdf plugin add kubelogin && \
+    asdf install kubelogin latest && \
+    asdf global kubelogin latest
+
+# Install LazyVim
+RUN git clone https://github.com/LazyVim/starter ~/.config/nvim && \
+    rm -rf ~/.config/nvim/.git
+
+RUN cat <<EOF > ~/.config/nvim/lua/plugins/lsp.lua
+return {
+  {
+    "neovim/nvim-lspconfig",
+    ---@module "lazyvim"
+    ---@type PluginLspOpts
+    opts = {
+          ---@module "lspconfig.configs"
+          ---@type table<string, lspconfig.Config>
+          servers = {
+            yamlls = {
+              before_init = function(_, config)
+                vim.tbl_deep_extend("force", config, { settings = { yaml = { keyOrdering = false } } })
+              end,
+            },
+          },
+        },
+      },
+    
+      {
+        "cwrau/yaml-schema-detect.nvim",
+        config = true,
+        dependencies = { "neovim/nvim-lspconfig", "which-key.nvim" },
+        ft = { "yaml" },
+      },
+    }
+EOF
+
+
+
+
+# install nvim packages
+RUN nvim --headless -c "Lazy sync" -c "quitall"
+
+# Set environment variables
+ENV PATH="/usr/local/bin:${PATH}"
+ENV EDITOR=nvim
+
+# Keep container running
+#CMD ["tail", "-f", "/dev/null"]
+CMD ["/bin/bash"]
