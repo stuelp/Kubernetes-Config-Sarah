@@ -20,7 +20,7 @@
     },
     "remoteUser": "root",
     "mounts": [
-        "source=${localEnv:USERPROFILE}/.kube/kkubeconfig,target=/root/.kube/config,type=bind,readonly",
+        "source=${localEnv:USERPROFILE}/.kube/kkubeconfig.yaml,target=/root/.kube/config,type=bind,readonly",
         "source=${localEnv:USERPROFILE}/.sops/keys.txt,target=/root/.config/sops/age/keys.txt,type=bind,readonly"
  
     ]
