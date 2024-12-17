@@ -18,9 +18,11 @@ spec:
   values:
     flux:
       gitRepositories:
-        - url: ssh://git@github.com/NW-BI/KUBERNETES-CONFIG
+        - name: base-cluster  
+          url: ssh://git@github.com/stuelp/Kubernetes-Config-Sarah
           branch: main
-          path: ./{{.Values.global.clusterName}}
+          path: ./clusters/{{.Values.global.clusterName}}
+    global: {}
           
           
 
